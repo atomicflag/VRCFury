@@ -46,6 +46,7 @@ namespace VF.Model.Feature {
         public string globalParam = "";
         public bool holdButton;
         public bool invertRestLogic;
+        public bool localOnly;
         public bool expandIntoTransition = true;
 
         public override bool Upgrade(int fromVersion) {

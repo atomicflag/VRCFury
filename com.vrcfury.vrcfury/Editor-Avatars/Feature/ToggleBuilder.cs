@@ -85,6 +85,8 @@ namespace VF.Feature {
                 synced = false;
             }
 
+            var networkSynced = !model.localOnly;
+
             var (paramName, usePrefixOnParam) = GetParamName();
             VFCondition onCase;
             VFAFloat weight = null;
@@ -93,6 +95,7 @@ namespace VF.Feature {
                 var param = fx.NewFloat(
                     paramName,
                     synced: synced,
+                    networkSynced: networkSynced,
                     saved: model.saved,
                     def: model.defaultSliderValue,
                     usePrefix: usePrefixOnParam
@@ -112,13 +115,13 @@ namespace VF.Feature {
                     );
                 }
             } else if (model.useInt) {
-                var param = fx.NewInt(paramName, synced: true, saved: model.saved, def: model.defaultOn ? 1 : 0, usePrefix: usePrefixOnParam);
+                var param = fx.NewInt(paramName, synced: true, networkSynced: networkSynced, saved: model.saved, def: model.defaultOn ? 1 : 0, usePrefix: usePrefixOnParam);
                 onCase = param.IsNotEqualTo(0);
                 exclusiveParam = param;
                 drive = (state,on) => state.Drives(param, on ? 1 : 0);
                 defaultOn = model.defaultOn;
             } else {
-                var param = fx.NewBool(paramName, synced: synced, saved: model.saved, def: model.defaultOn, usePrefix: usePrefixOnParam);
+                var param = fx.NewBool(paramName, synced: synced, networkSynced: networkSynced, saved: model.saved, def: model.defaultOn, usePrefix: usePrefixOnParam);
                 onCase = param.IsTrue();
                 exclusiveParam = param;
                 drive = (state,on) => state.Drives(param, on ? 1 : 0);
@@ -409,6 +412,7 @@ namespace VF.Feature {
             var enableIconProp = prop.FindPropertyRelative("enableIcon");
             var enableDriveGlobalParamProp = prop.FindPropertyRelative("enableDriveGlobalParam");
             var separateLocalProp = prop.FindPropertyRelative("separateLocal");
+            var localOnlyProp = prop.FindPropertyRelative("localOnly");
             var hasTransitionProp = prop.FindPropertyRelative("hasTransition");
             var simpleOutTransitionProp = prop.FindPropertyRelative("simpleOutTransition");
             var defaultSliderProp = prop.FindPropertyRelative("defaultSliderValue");
@@ -496,6 +500,11 @@ namespace VF.Feature {
 
                     advMenu.AddItem(new GUIContent("Drive a Global Parameter"), enableDriveGlobalParamProp.boolValue, () => {
                         enableDriveGlobalParamProp.boolValue = !enableDriveGlobalParamProp.boolValue;
+                        prop.serializedObject.ApplyModifiedProperties();
+                    });
+
+                    advMenu.AddItem(new GUIContent("Local Only"), localOnlyProp.boolValue, () => {
+                        localOnlyProp.boolValue = !localOnlyProp.boolValue;
                         prop.serializedObject.ApplyModifiedProperties();
                     });
 
@@ -630,6 +639,8 @@ namespace VF.Feature {
                     var tags = new List<string>();
                     if (savedProp.boolValue)
                         tags.Add("Saved");
+                    if (localOnlyProp.boolValue)
+                        tags.Add("Local");
                     if (securityEnabledProp.boolValue)
                         tags.Add("Security");
                     if (!sliderProp.boolValue) {
@@ -658,6 +669,7 @@ namespace VF.Feature {
                     return row;
                 },
                 savedProp,
+                localOnlyProp,
                 securityEnabledProp,
                 defaultOnProp,
                 invertRestLogicProp,

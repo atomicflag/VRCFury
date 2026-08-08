@@ -102,7 +102,7 @@ namespace VF.Utils {
             }
             return _NewInt(name, def);
         }
-        public VFAFloat NewFloat(string name, bool synced = false, float def = 0, bool saved = false, bool usePrefix = true) {
+        public VFAFloat NewFloat(string name, bool synced = false, bool networkSynced = true, float def = 0, bool saved = false, bool usePrefix = true) {
             if (usePrefix) {
                 name = Regex.Replace(name, @"^VF\d+_", "");
                 name = makeUniqueParamName(name);
@@ -113,6 +113,7 @@ namespace VF.Utils {
                 param.valueType = VRCExpressionParameters.ValueType.Float;
                 param.saved = saved;
                 param.defaultValue = def;
+                param.SetNetworkSynced(networkSynced, true);
                 GetParamManager().AddSyncedParam(param);
             }
             return _NewFloat(name, def);
